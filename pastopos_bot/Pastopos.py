@@ -1,12 +1,17 @@
 from typing import Final
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes, CallbackQueryHandler
-import db, re
-import googlemaps
 from io import BytesIO
+import re
+
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram.ext import (Application, CommandHandler, MessageHandler, filters, ContextTypes, CallbackQueryHandler)
+import googlemaps
+
+import db
+
+
 
 #Important data
-TOKEN: Final = ''
+TOKEN: Final = '6286538633:AAHKe8VbQYBflslOQbMcUuUhFX2SAOWJ2JA'
 BOT_USERNAME: Final = '@pastopos_bot'
 
 
@@ -17,9 +22,9 @@ street = ''
 list_rating = [0, 0, 0, 0]
 review_mode = False
 review_read_mode = False
-pattern_emoji = "["u"\U0001F600-\U0001F64F" u"\U0001F300-\U0001F5FF"u"\U0001F680-\U0001F6FF"u"\U0001F1E0-\U0001F1FF"u"\U00002702-\U000027B0"u"\U000024C2-\U0001F251" "]+"
+pattern_emoji = "[" u"\U0001F600-\U0001F64F" u"\U0001F300-\U0001F5FF"u"\U0001F680-\U0001F6FF"u"\U0001F1E0-\U0001F1FF"u"\U00002702-\U000027B0"u"\U000024C2-\U0001F251" "]+"
 city = 'Львів'
-API_KEY = ''
+API_KEY = 'AIzaSyButKq_BE0QiKWI12e_s0j-xMJ0W9DZhKY'
                                    
 #Answers
 start_answer = 'Привіт! Введи адресу для знаходження закладу харчування! Всі доступні команди можеш переглянути за допомогою команди /help'
@@ -28,7 +33,7 @@ not_enough_args = 'Недостатньо аргументів. Використ
 
 async def find_gplace_photo(restaurant_name, city, chat_id):
     print(restaurant_name)
-    gmaps = googlemaps.Client(key=API_KEY)
+    gmaps = googlemaps.Client(key = API_KEY)
     query_str = f'{restaurant_name}, {city}'
     response = gmaps.places_autocomplete(input_text=query_str)
     
@@ -41,7 +46,7 @@ async def find_gplace_photo(restaurant_name, city, chat_id):
         
         if 'result' in place_details and 'photos' in place_details['result']:
             photo_id = place_details['result']['photos'][0]['photo_reference']
-            photo_response = gmaps.places_photo(photo_reference=photo_id, max_height=250, max_width=250)
+            photo_response = gmaps.places_photo(photo_reference=photo_id, max_height = 250, max_width = 250)
             
             photo_data = photo_response.content
             photo_file = BytesIO(photo_data)
@@ -50,8 +55,8 @@ async def find_gplace_photo(restaurant_name, city, chat_id):
             print('No photos available for this place.')
     else:
         print('No candidates found for the given query.')
-#Commands
 
+#Commands
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(start_answer)
 
@@ -156,14 +161,14 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         global review_mode
         global review_read_mode
         # Check for emojis using regular expression
-        emoji_pattern = re.compile(pattern_emoji, flags=re.UNICODE)
+        emoji_pattern = re.compile(pattern_emoji, flags = re.UNICODE)
         if emoji_pattern.search(text):
-            await context.bot.send_message(chat_id=message.chat_id, text="На жаль, емодзі заборонені).")
+            await context.bot.send_message(chat_id = message.chat_id, text = "На жаль, емодзі заборонені).")
             return
         # Check for stickers and GIFs
         if message.sticker or message.animation:
             # Handle the message accordingly (e.g., ignore, send error response)
-            await context.bot.send_message(chat_id=message.chat_id, text="На жаль, ви не можете відправляти стікери та GIF повідомлення.")
+            await context.bot.send_message(chat_id = message.chat_id, text = "На жаль, ви не можете відправляти стікери та GIF повідомлення.")
             return
         
         print(f'{update.message.chat.id} user in {message_type}: {text}')
@@ -177,7 +182,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 review_read_mode = False
                 await db.print_reviews(restaurant, text, update)
             else:
-                await context.bot.send_message(chat_id=message.chat_id, text="Виввели не число")
+                await context.bot.send_message(chat_id = message.chat_id, text = "Виввели не число")
 
         if message_type == 'group':
             if BOT_USERNAME in text:
@@ -186,7 +191,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             else:
                 return
     else:
-        await context.bot.send_message(chat_id=message.chat_id, text="На жаль, даний бот не приймає емодзі, стікери та GIF повідомлення.")
+        await context.bot.send_message(chat_id = message.chat_id, text = "На жаль, даний бот не приймає емодзі, стікери та GIF повідомлення.")
   
     
 
